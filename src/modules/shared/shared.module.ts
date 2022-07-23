@@ -1,5 +1,7 @@
 import { Global, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { Post } from '../posts/entities/post.entity';
+import { User } from '../users/entities/user.entity';
 
 @Global()
 @Module({
@@ -12,6 +14,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       username: 'postgres',
       password: 'postgres',
       logger: 'debug',
+      entities: [User, Post],
       useUTC: true,
     }),
   ],
