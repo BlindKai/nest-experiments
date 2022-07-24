@@ -1,6 +1,5 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
 import * as path from 'path';
-import { DatabaseLogger } from './logger';
 
 export const config: DataSourceOptions = {
   type: 'postgres',
@@ -9,7 +8,8 @@ export const config: DataSourceOptions = {
   database: 'typeorm-test',
   username: 'postgres',
   password: 'postgres',
-  logger: new DatabaseLogger(),
+  logger: 'advanced-console',
+  logging:true,
   entities: [path.join(__dirname, '/../**/*.entity{.ts,.js}')],
   useUTC: true,
   migrationsTableName: 'migrations',
