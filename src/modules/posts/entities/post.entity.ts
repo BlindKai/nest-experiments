@@ -1,10 +1,20 @@
-import { User } from 'src/modules/users/entities/user.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { User } from '../../users/entities/user.entity';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  Unique,
+  UpdateDateColumn,
+} from 'typeorm';
 
-@Entity()
+@Unique('unique_post_titles', ['title'])
+@Entity({ name: 'posts' })
 export class Post {
   @PrimaryGeneratedColumn()
-  id: number;
+  postId: number;
 
   @Column()
   title: string;
@@ -12,6 +22,21 @@ export class Post {
   @Column({ type: 'text' })
   body: string;
 
-  @ManyToOne(() => User, (user) => user.posts)
+  @CreateDateColumn({ type: 'timestamptz' })
+  createAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz', onUpdate: 'NOW()' })
+  updateAt: Date;
+
+  @ManyToOne(() => User, (user) => user.posts, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+    nullable: false,
+  })
+  @JoinColumn({
+    name: 'author',
+    referencedColumnName: 'userId',
+    foreignKeyConstraintName: 'fk_posts_author',
+  })
   author: User;
 }

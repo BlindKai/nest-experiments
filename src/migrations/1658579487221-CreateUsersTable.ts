@@ -4,26 +4,36 @@ export class CreateUsersTable1658579487221 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'user',
+        name: 'users',
         columns: [
-          { name: 'userId', type: 'uuid', default: 'uuid_generate_v4()' },
+          {
+            name: 'userId',
+            type: 'uuid',
+            isPrimary: true,
+            isGenerated: true,
+            generationStrategy: 'uuid',
+          },
           { name: 'firstName', type: 'varchar' },
           { name: 'lastName', type: 'varchar' },
-          { name: 'isActive', type: 'boolean' },
-          { name: 'createAt', type: 'timestamptz', default: 'now()' },
+          { name: 'isActive', type: 'boolean', default: true },
+          { name: 'createAt', type: 'timestamptz', default: 'NOW()' },
           {
             name: 'updateAt',
             type: 'timestamptz',
-            default: 'now()',
-            onUpdate: 'now()',
+            default: 'NOW()',
+            onUpdate: 'NOW()',
           },
         ],
+        uniques: [
+          { columnNames: ['firstName', 'lastName'], name: 'unique_user_names' },
+        ],
       }),
+      true,
       true,
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('user', true);
+    await queryRunner.dropTable('users', true, true, true);
   }
 }

@@ -1,7 +1,16 @@
-import { Post } from 'src/modules/posts/entities/post.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Post } from '../../posts/entities/post.entity';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  Unique,
+  UpdateDateColumn,
+} from 'typeorm';
 
-@Entity()
+@Unique('unique_user_names', ['firstName', 'lastName'])
+@Entity({ name: 'users' })
 export class User {
   @PrimaryGeneratedColumn('uuid')
   userId: string;
@@ -14,6 +23,12 @@ export class User {
 
   @Column({ default: true })
   isActive: boolean;
+
+  @CreateDateColumn({ type: 'timestamptz' })
+  createAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz', onUpdate: 'NOW()' })
+  updateAt: Date;
 
   @OneToMany(() => Post, (post) => post.author)
   posts: Post[];
