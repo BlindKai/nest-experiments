@@ -45,8 +45,13 @@ export class UsersService {
           title: true,
           createAt: true,
         },
+        subscribers: {
+          userId: true,
+          firstName: true,
+          lastName: true,
+        },
       },
-      relations: { posts: true },
+      relations: { posts: true, subscribers: true },
       where: { userId },
     });
   }
