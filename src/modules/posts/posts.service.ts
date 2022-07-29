@@ -22,25 +22,17 @@ export class PostsService {
   }
 
   findAll(limit: number, offset: number, search?: string) {
-    const options: FindManyOptions<Post> = {
-      select: {
-        postId: true,
-        title: true,
-        author: {
-          firstName: true,
-          lastName: true,
-        },
-      },
-      relations: { author: true },
-      take: limit,
-      skip: offset,
-    };
+    const query = this.postRepository
+      .createQueryBuilder()
+      .select(['"postId"', 'author', 'title', `"createAt"`])
+      .limit(limit)
+      .offset(offset);
 
     if (search) {
-      options.where = { title: Like(`%${search}%`) };
+      query.where('title LIKE :title', { title: `%${search}%` });
     }
 
-    return this.postRepository.find(options);
+    return query.getRawMany();
   }
 
   findOne(postId: number) {

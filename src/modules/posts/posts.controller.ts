@@ -7,10 +7,12 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { ListPostDto } from './dto/list-post.dto';
 
 @Controller('posts')
 export class PostsController {
@@ -22,8 +24,10 @@ export class PostsController {
   }
 
   @Get()
-  findAll() {
-    return this.postsService.findAll(10, 0);
+  findAll(@Query() { page, pageSize, search }: ListPostDto) {
+    const limit = pageSize;
+    const offset = (page - 1) * pageSize;
+    return this.postsService.findAll(limit, offset, search);
   }
 
   @Get(':id')
