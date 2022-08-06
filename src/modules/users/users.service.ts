@@ -70,7 +70,14 @@ export class UsersService {
   }
 
   async subscribe(subscriberId: string, userId: string) {
-    await this.userRepository.update({ userId }, {});
+    const user = await this.userRepository.findOne({
+      where: { userId },
+      relations: { subscribers: true },
+    });
+    await this.userRepository.update(
+      { userId },
+      { subscribers: [...user.subscribers, { userId: subscriberId }] },
+    );
   }
 
   remove(userId: string) {
