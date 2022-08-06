@@ -19,11 +19,15 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "migration:schema:drop": "typeorm-ts-node-commonjs -d ./src/database/ormconfig.ts schema:drop",
+    "migration:schema:drop": "typeorm-ts-node-commonjs -d ./src/database/ormconfig.migrations.ts schema:drop",
     "migration:create": "typeorm-ts-node-commonjs migration:create",
-    "migration:generate": "typeorm-ts-node-commonjs -d ./src/database/ormconfig.ts migration:generate",
-    "migration:up": "typeorm-ts-node-commonjs -d ./src/database/ormconfig.ts migration:run",
-    "migration:down": "typeorm-ts-node-commonjs -d ./src/database/ormconfig.ts migration:revert"
+    "migration:generate": "typeorm-ts-node-commonjs -d ./src/database/ormconfig.migrations.ts migration:generate",
+    "migration:up": "typeorm-ts-node-commonjs -d ./src/database/ormconfig.migrations.ts migration:run",
+    "migration:down": "typeorm-ts-node-commonjs -d ./src/database/ormconfig.migrations.ts migration:revert",
+    "seed:create": "typeorm-ts-node-commonjs migration:create",
+    "seed:run": "typeorm-ts-node-commonjs -d ./src/database/ormconfig.seeds.ts migration:run",
+    "seed:clean": "typeorm-ts-node-commonjs -d ./src/database/ormconfig.seeds.ts migration:revert"
+
   },
   "dependencies": {
     "@nestjs/common": "^9.0.0",

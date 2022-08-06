@@ -11,8 +11,8 @@ export const config: DataSourceOptions = {
   logger: 'advanced-console',
   logging: true,
   useUTC: true,
-  entities: [path.join(__dirname, '/../**/*.entity{.ts,.js}')],
-  migrations: [path.join(__dirname, '/../migrations/**/*{.ts,.js}')],
+  entities: [path.join(__dirname, '..', '**/*.entity{.ts,.js}')],
+  migrations: [path.join(__dirname, '..', 'migrations/**/*{.ts,.js}')],
   migrationsTableName: 'migrations',
   migrationsRun: true,
 };
