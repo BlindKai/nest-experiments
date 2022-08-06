@@ -27,13 +27,13 @@
     "seed:create": "typeorm-ts-node-commonjs migration:create",
     "seed:run": "typeorm-ts-node-commonjs -d ./src/database/ormconfig.seeds.ts migration:run",
     "seed:clean": "typeorm-ts-node-commonjs -d ./src/database/ormconfig.seeds.ts migration:revert"
-
   },
   "dependencies": {
     "@nestjs/common": "^9.0.0",
     "@nestjs/core": "^9.0.0",
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/swagger": "^6.0.5",
     "@nestjs/typeorm": "^9.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
