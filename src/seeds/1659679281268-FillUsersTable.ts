@@ -3,7 +3,7 @@ import { User } from '../modules/users/entities/user.entity';
 
 export class FillUsersTable1659679281268 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    queryRunner.manager.getRepository(User).insert([
+    await queryRunner.manager.getRepository(User).insert([
       {
         userId: 'a9ebfa92-42cc-4094-a1ce-2b86b985a510',
         firstName: 'John',
@@ -26,6 +26,6 @@ export class FillUsersTable1659679281268 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    queryRunner.manager.getRepository(User).clear();
+    await queryRunner.manager.getRepository(User).clear();
   }
 }
