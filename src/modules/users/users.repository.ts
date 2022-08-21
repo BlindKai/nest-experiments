@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Post } from '../posts/entities/post.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -10,6 +10,7 @@ import { User } from './entities/user.entity';
 export class UsersRepository {
   constructor(
     @InjectRepository(User) private readonly repository: Repository<User>,
+    private readonly dataSource: DataSource,
   ) {}
 
   create(createUserDto: CreateUserDto) {
@@ -81,5 +82,25 @@ export class UsersRepository {
       { userId },
       { subscribers: [...user.subscribers, { userId: subscriberId }] },
     );
+  }
+
+  /**
+   * @see https://typeorm.io/transactions#using-queryrunner-to-create-and-control-state-of-single-database-connection
+   */
+  async exampleOfTransaction() {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      await queryRunner.query('SELECT 1 + 1');
+
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
+    }
   }
 }
