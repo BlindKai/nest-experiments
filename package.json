@@ -81,6 +81,18 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
+    "coveragePathIgnorePatterns": [
+      "<rootDir>/dist/",
+      "<rootDir>/node_modules/",
+      "<rootDir>/database/",
+      "<rootDir>/migrations/",
+      "<rootDir>/seeds/",
+      "<rootDir>/documentation/",
+      ".module.ts",
+      ".dto.ts",
+      ".entity.ts",
+      "main.ts"
+    ],
     "testEnvironment": "node"
   }
 }
