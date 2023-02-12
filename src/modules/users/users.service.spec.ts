@@ -3,6 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { FindOneOptions, Repository, SelectQueryBuilder } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
+import { UsersRepository } from './users.repository';
 import { UsersService } from './users.service';
 
 /**
@@ -41,7 +42,7 @@ const mockQueryBuilder: MockType<Partial<SelectQueryBuilder<User>>> = {
   getCount: jest.fn(),
 };
 
-const mockUsersRepository: MockType<Repository<User>> = {
+export const mockUsersRepository: MockType<Repository<User>> = {
   findOne: jest.fn(),
   findAndCount: jest.fn(),
   update: jest.fn(),
@@ -52,13 +53,14 @@ const mockUsersRepository: MockType<Repository<User>> = {
 };
 
 describe('Users Service', () => {
-  let service: UsersService;
+  let repo: UsersRepository;
   let mockRepository: MockType<Repository<User>>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UsersService,
+        UsersRepository,
         {
           provide: getRepositoryToken(User),
           useValue: mockUsersRepository,
@@ -66,17 +68,17 @@ describe('Users Service', () => {
       ],
     }).compile();
 
-    service = module.get(UsersService);
+    repo = module.get(UsersRepository);
     mockRepository = module.get(getRepositoryToken(User));
   });
 
   describe('Add new user', () => {
     test('When all the required fields are passed the user is successfully created', async () => {
-      jest.spyOn(service, 'create');
+      jest.spyOn(repo, 'create');
 
-      await expect(service.create(userDto)).resolves.toEqual(testUser);
+      await expect(repo.create(userDto)).resolves.toEqual(testUser);
 
-      expect(service.create).toBeCalledTimes(1);
+      expect(repo.create).toBeCalledTimes(1);
 
       expect(mockRepository.create).toBeCalledTimes(1);
       expect(mockRepository.save).toBeCalledTimes(1);
@@ -86,23 +88,23 @@ describe('Users Service', () => {
       const emptyUserDto = {} as CreateUserDto;
       const error = new Error('Not all required fields are provided');
 
-      jest.spyOn(service, 'create').mockRejectedValue(error);
+      jest.spyOn(repo, 'create').mockRejectedValue(error);
 
-      await expect(service.create(emptyUserDto)).rejects.toBeInstanceOf(Error);
+      await expect(repo.create(emptyUserDto)).rejects.toBeInstanceOf(Error);
 
-      expect(service.create).toBeCalledTimes(1);
+      expect(repo.create).toBeCalledTimes(1);
     });
   });
 
   describe('Find a single user', () => {
     test('When provided userId has a match return the user', async () => {
-      jest.spyOn(service, 'findOne');
+      jest.spyOn(repo, 'findOne');
       mockRepository.findOne.mockResolvedValue(testUser);
 
-      const user = await service.findOne(testUser.userId);
+      const user = await repo.findOne(testUser.userId);
 
       expect(user).toEqual(testUser);
-      expect(service.findOne).toHaveBeenCalledWith(testUser.userId);
+      expect(repo.findOne).toHaveBeenCalledWith(testUser.userId);
 
       expect(mockRepository.findOne).toBeCalledTimes(1);
       expect(mockRepository.findOne).toHaveBeenCalledWith(
@@ -115,29 +117,29 @@ describe('Users Service', () => {
 
   describe('Find all users', () => {
     test('When no search filter is provided and a pagination is applied should return paginated users', async () => {
-      jest.spyOn(service, 'findAll');
+      jest.spyOn(repo, 'findAll');
 
       mockQueryBuilder.getRawMany.mockResolvedValue([testUser]);
       mockQueryBuilder.getCount.mockResolvedValue(1);
 
-      const users = await service.findAll(5, 0);
+      const users = await repo.findAll(5, 0);
 
       expect(users).toEqual({ count: 1, items: [testUser] });
-      expect(service.findAll).toHaveBeenCalledWith(5, 0);
+      expect(repo.findAll).toHaveBeenCalledWith(5, 0);
 
       expect(mockRepository.createQueryBuilder).toBeCalledTimes(1);
     });
 
     test('When search filter is provided and a pagination is applied should return paginated users by search', async () => {
-      jest.spyOn(service, 'findAll');
+      jest.spyOn(repo, 'findAll');
 
       mockQueryBuilder.getRawMany.mockResolvedValue([testUser]);
       mockQueryBuilder.getCount.mockResolvedValue(1);
 
-      const users = await service.findAll(5, 0, 'John');
+      const users = await repo.findAll(5, 0, 'John');
 
       expect(users).toEqual({ count: 1, items: [testUser] });
-      expect(service.findAll).toHaveBeenCalledWith(5, 0, 'John');
+      expect(repo.findAll).toHaveBeenCalledWith(5, 0, 'John');
 
       expect(mockRepository.createQueryBuilder).toBeCalledTimes(1);
       expect(mockQueryBuilder.where).toHaveBeenCalled();
@@ -148,19 +150,19 @@ describe('Users Service', () => {
   test('When a valid userId is provided update user properties with given values', async () => {
     const updateAtDate = new Date();
 
-    jest.spyOn(service, 'update');
-    jest.spyOn(service, 'findOne').mockResolvedValue({
+    jest.spyOn(repo, 'update');
+    jest.spyOn(repo, 'findOne').mockResolvedValue({
       ...testUser,
       updateAt: updateAtDate,
       firstName: 'Adam',
     });
 
-    const updatedUser = await service.update(testUser.userId, {
+    const updatedUser = await repo.update(testUser.userId, {
       firstName: 'Adam',
     });
 
-    expect(service.update).toBeCalled();
-    expect(service.findOne).toHaveBeenCalled();
+    expect(repo.update).toBeCalled();
+    expect(repo.findOne).toHaveBeenCalled();
 
     expect(mockRepository.update).toHaveBeenCalled();
     expect(mockRepository.update).toHaveBeenCalledWith(
@@ -173,29 +175,37 @@ describe('Users Service', () => {
   });
 
   test('When a valid userId is provided add a subscriber to a given user', async () => {
-    jest.spyOn(service, 'subscribe');
-    jest.spyOn(service, 'findOne').mockResolvedValue({
+    jest.spyOn(repo, 'subscribe');
+    jest.spyOn(repo, 'findOne').mockResolvedValue({
       ...testUser,
     });
 
-    await service.subscribe(testUser.userId, 'a9ebfa92-42cc-4094-a1ce-2b86b985a510');
+    await repo.subscribe(
+      testUser.userId,
+      'a9ebfa92-42cc-4094-a1ce-2b86b985a510',
+    );
 
-    expect(service.subscribe).toBeCalled();
-    
+    expect(repo.subscribe).toBeCalled();
+
     expect(mockRepository.findOne).toHaveBeenCalled();
     expect(mockRepository.update).toHaveBeenCalled();
     expect(mockRepository.update).toHaveBeenCalledWith(
       { userId: testUser.userId },
-      { subscribers: [...testUser.subscribers, { userId: 'a9ebfa92-42cc-4094-a1ce-2b86b985a510' }] },
+      {
+        subscribers: [
+          ...testUser.subscribers,
+          { userId: 'a9ebfa92-42cc-4094-a1ce-2b86b985a510' },
+        ],
+      },
     );
   });
 
   test('When a valid userId is provided delete the user for that userId', async () => {
-    jest.spyOn(service, 'remove');
+    jest.spyOn(repo, 'delete');
 
-    await service.remove(testUser.userId);
+    await repo.delete(testUser.userId);
 
-    expect(service.remove).toBeCalled();
+    expect(repo.delete).toBeCalled();
     expect(mockRepository.delete).toHaveBeenCalled();
     expect(mockRepository.delete).toHaveBeenCalledWith({
       userId: testUser.userId,
